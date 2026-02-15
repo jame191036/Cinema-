@@ -1,0 +1,35 @@
+# Go
+backend/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Vue / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.log
+
+# Firebase service account keys
+*firebase-adminsdk*
+*serviceAccountKey*
+
+# Docker
+docker-compose.override.yml
