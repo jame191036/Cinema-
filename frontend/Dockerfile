@@ -1,0 +1,35 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+ARG NUXT_PUBLIC_FIREBASE_API_KEY
+ARG NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ARG NUXT_PUBLIC_FIREBASE_PROJECT_ID
+
+ENV NUXT_PUBLIC_FIREBASE_API_KEY=$NUXT_PUBLIC_FIREBASE_API_KEY
+ENV NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ENV NUXT_PUBLIC_FIREBASE_PROJECT_ID=$NUXT_PUBLIC_FIREBASE_PROJECT_ID
+
+RUN npm run build
+
+# Stage 2: Run with Node
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/.output .output
+COPY --from=builder /app/node_modules/.cache/nuxt/.nuxt/dist .nuxt/dist
+
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV NITRO_PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]
