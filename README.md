@@ -254,7 +254,6 @@ This is the final line of defense against double booking.
 ```bash
 # Clone the repo
 git clone <repo-url>
-cd jj
 
 # Start everything
 docker compose up --build
@@ -297,7 +296,7 @@ npm run dev
 ## Project Structure
 
 ```
-jj/
+cinema/
 ├── backend/
 │   ├── cmd/server/main.go          # Entry point
 │   ├── internal/
