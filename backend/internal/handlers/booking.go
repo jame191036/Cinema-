@@ -302,7 +302,7 @@ func (h *BookingHandler) ConfirmBooking(c *gin.Context) {
 	log.Printf("User: %s (%s)", user.Name, user.Email)
 
 	// Publish MQ event
-	event := mq.NewBookingConfirmedEvent(bookingIdStr, userId, showtimeIdStr, booking.Seats)
+	event := mq.NewBookingConfirmedEvent(bookingIdStr, userId, user.Email, user.Name, showtimeIdStr, booking.Seats)
 	h.MQ.SafePublish(event)
 
 	c.JSON(http.StatusOK, gin.H{"status": "BOOKED"})

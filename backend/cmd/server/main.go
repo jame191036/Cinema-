@@ -46,11 +46,17 @@ func main() {
 	workerInterval := time.Duration(cfg.WorkerInterval) * time.Second
 	tw := worker.NewTimeoutWorker(mongoSvc, redisSvc, hub, workerInterval)
 	tw.Start()
+	emailSvc := services.NewEmailService(
+		cfg.SMTPHost,
+		cfg.SMTPPort,
+		cfg.SMTPUsername,
+		cfg.SMTPPassword,
+		cfg.SMTPFrom,
+	)
 
 	// MQ Consumer - writes audit logs on BookingConfirmed
 	if mqSvc.IsConnected() {
 		mqSvc.Consume(func(event mq.BookingEvent) {
-			log.Printf("MQ Consumer: received event %s for booking %s", event.EventType, event.BookingID)
 
 			if event.EventType == "BookingConfirmed" {
 				bookingOID, _ := primitive.ObjectIDFromHex(event.BookingID)
@@ -70,7 +76,22 @@ func main() {
 					CreatedAt: time.Now(),
 				}
 				mongoSvc.Collection("audit_logs").InsertOne(context.Background(), auditLog)
-				log.Printf("MQ Consumer: audit log created for booking %s", event.BookingID)
+
+				if event.UserEmail != "" {
+					go func(e mq.BookingEvent) {
+						err := emailSvc.SendBookingConfirmation(services.BookingConfirmationData{
+							UserName:   e.UserName,
+							UserEmail:  e.UserEmail,
+							BookingID:  e.BookingID,
+							Seats:      e.Seats,
+							ShowtimeID: e.ShowtimeID,
+							OccurredAt: e.OccurredAt,
+						})
+						if err != nil {
+							log.Printf("Email send error: %v", err)
+						}
+					}(event)
+				}
 			}
 		})
 	}

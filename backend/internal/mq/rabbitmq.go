@@ -17,6 +17,8 @@ type BookingEvent struct {
 	OccurredAt string   `json:"occurredAt"`
 	BookingID  string   `json:"bookingId"`
 	UserID     string   `json:"userId"`
+	UserEmail  string   `json:"userEmail"`
+	UserName   string   `json:"userName"`
 	ShowtimeID string   `json:"showtimeId"`
 	Seats      []string `json:"seats"`
 }
@@ -108,13 +110,15 @@ func (s *MQService) Close() {
 	}
 }
 
-func NewBookingConfirmedEvent(bookingID, userID, showtimeID string, seats []string) BookingEvent {
+func NewBookingConfirmedEvent(bookingID, userID, userEmail, userName, showtimeID string, seats []string) BookingEvent {
 	return BookingEvent{
 		EventID:    uuid.New().String(),
 		EventType:  "BookingConfirmed",
 		OccurredAt: time.Now().UTC().Format(time.RFC3339),
 		BookingID:  bookingID,
 		UserID:     userID,
+		UserEmail:  userEmail,
+		UserName:   userName,
 		ShowtimeID: showtimeID,
 		Seats:      seats,
 	}
